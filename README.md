@@ -49,5 +49,7 @@ T-Банк - 2200701962437361
 Заранее благодарен каждому донату :)
 
 ---
-Binary: [tg-ws-proxy-rs](https://github.com/n0id/tg-ws-proxy-rs)  
+Binary: [tg-ws-proxy-rs](https://github.com/valnesfjord)
+
+[FLOWSEAL](https://github.com/FLOWSEAL) - Owner
 Module by: [F1NDLE](https://github.com/F1NDLE)
