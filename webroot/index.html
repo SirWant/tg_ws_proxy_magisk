@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TG WS Proxy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #09090f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --surface3: #1e1e27;
+    --border: #2a2a35;
+    --border-hi: #3d3d50;
+    --text: #e8e8f0;
+    --muted: #666680;
+    --muted2: #4a4a60;
+    --accent: #7c6ef7;
+    --accent-dim: #7c6ef718;
+    --accent-glow: #7c6ef740;
+    --green: #3dd68c;
+    --green-dim: #3dd68c18;
+    --red: #f76e6e;
+    --red-dim: #f76e6e18;
+    --yellow: #f0c060;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+  }
+  .logo {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #7c6ef7, #a78bfa);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  header h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+  header .ver {
+    font-size: 10px; color: var(--muted); margin-left: auto;
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 2px 7px; border-radius: 20px; font-family: var(--mono);
+  }
+
+  /* ── Layout ── */
+  main { padding: 14px; max-width: 540px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card-hdr {
+    padding: 10px 14px 9px;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card-hdr .hdr-actions { margin-left: auto; }
+  .card-hdr-icon {
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; opacity: 0.7;
+  }
+
+  /* ── Status ── */
+  .status-body { padding: 14px 14px 12px; display: flex; align-items: center; gap: 12px; }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    background: var(--muted2);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .dot.running {
+    background: var(--green);
+    box-shadow: 0 0 0 3px var(--green-dim), 0 0 8px var(--green);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  .dot.stopped { background: var(--red); box-shadow: 0 0 0 3px var(--red-dim); }
+  .dot.loading { background: var(--yellow); animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .status-info { flex: 1; min-width: 0; }
+  .status-label { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+  .status-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
+  .btn-row { display: flex; gap: 7px; flex-shrink: 0; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 7px 13px; border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+    white-space: nowrap; font-family: inherit;
+    letter-spacing: 0.01em;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .btn-primary {
+    background: linear-gradient(135deg, #7c6ef7, #9b8ffa);
+    color: #fff; border-color: #7c6ef7;
+    box-shadow: 0 2px 8px var(--accent-glow);
+  }
+  .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+  .btn-danger {
+    background: var(--red-dim); color: var(--red); border-color: var(--red);
+  }
+  .btn-danger:hover:not(:disabled) { background: var(--red); color: #fff; }
+  .btn-ghost {
+    background: var(--surface2); color: var(--text); border-color: var(--border);
+  }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  /* ── Button bounce on hover ── */
+  .btn:not(:disabled) {
+    transition: opacity 0.15s, transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s;
+  }
+  .btn:not(:disabled):hover {
+    transform: translateY(-3px) scale(1.04);
+  }
+  .btn:not(:disabled):active {
+    transform: scale(0.96) translateY(0px);
+  }
+  .btn-primary:not(:disabled):hover {
+    box-shadow: 0 6px 18px var(--accent-glow);
+  }
+  .btn-danger:not(:disabled):hover {
+    box-shadow: 0 4px 14px #f76e6e30;
+  }
+
+  /* ── Bottom nav ── */
+  #bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 20;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    backdrop-filter: blur(10px);
+  }
+  .tab-btn {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px; padding: 9px 4px 8px;
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-family: inherit;
+    transition: color 0.18s, transform 0.18s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+  }
+  .tab-btn:hover { transform: translateY(-3px) scale(1.08); color: var(--text); }
+  .tab-btn.active { color: var(--accent); }
+  .tab-btn.active::before {
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%;
+    height: 2px; background: var(--accent);
+    border-radius: 0 0 3px 3px;
+  }
+  .tab-icon { font-size: 18px; line-height: 1; }
+  .tab-label { font-size: 10px; font-weight: 600; letter-spacing: 0.03em; }
+
+  /* ── Tab pages ── */
+  .tab-page { display: none; flex-direction: column; gap: 10px; }
+  .tab-page.active { display: flex; }
+
+  main { padding-bottom: 72px; }
+
+  /* ── Link box ── */
+  .link-box { padding: 12px 14px; display: flex; align-items: center; gap: 8px; }
+  .link-text {
+    flex: 1; font-family: var(--mono); font-size: 11px;
+    color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background: var(--accent-dim); border: 1px solid var(--accent-glow);
+    border-radius: 6px; padding: 7px 9px;
+  }
+  .link-text.empty {
+    color: var(--muted); font-family: inherit; font-size: 12px;
+    background: var(--surface2); border-color: var(--border);
+  }
+
+  /* ── Settings ── */
+  .settings-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .field input {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-size: 13px; font-family: var(--mono);
+    padding: 8px 10px; outline: none; width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .field-row { display: flex; gap: 8px; }
+  .field-row .field { flex: 1; }
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 11px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+  }
+  .toggle-label { font-size: 13px; font-weight: 500; }
+  .toggle-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .toggle {
+    width: 40px; height: 23px; border-radius: 12px; border: none;
+    cursor: pointer; position: relative; background: var(--border);
+    transition: background 0.2s; flex-shrink: 0;
+  }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 17px; height: 17px; border-radius: 50%;
+    background: #fff; transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  .toggle.on { background: var(--accent); }
+  .toggle.on::after { transform: translateX(17px); }
+  .settings-actions {
+    padding: 11px 14px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; justify-content: flex-end;
+  }
+
+  /* ── Log ── */
+  .log-body { padding: 10px 12px; }
+  .log-out {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    white-space: pre-wrap; word-break: break-all;
+    max-height: 200px; overflow-y: auto; line-height: 1.65;
+  }
+  .log-out::-webkit-scrollbar { width: 4px; }
+  .log-out::-webkit-scrollbar-track { background: transparent; }
+  .log-out::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .log-out .li { color: #7cb8ff; }
+  .log-out .le { color: var(--red); }
+  .log-out .ll { color: var(--green); }
+  .log-empty { color: var(--muted2); font-size: 12px; padding: 4px 0; }
+
+  /* ── About card ── */
+  .about-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .about-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px;
+  }
+  .credit-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 11px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+  }
+  .credit-row + .credit-row { margin-top: 6px; }
+  .credit-icon {
+    font-size: 16px; width: 28px; text-align: center; flex-shrink: 0;
+  }
+  .credit-info { flex: 1; min-width: 0; }
+  .credit-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .credit-value { font-size: 13px; font-weight: 600; margin-top: 1px; }
+  .credit-value.mono { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .credit-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 20px; flex-shrink: 0;
+    background: var(--accent-dim); color: var(--accent);
+    border: 1px solid var(--accent-glow); letter-spacing: 0.05em;
+  }
+  .donate-block { display: flex; flex-direction: column; gap: 6px; }
+  .donate-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: var(--surface2);
+    position: relative; overflow: hidden;
+  }
+  .donate-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, var(--accent-dim));
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .donate-card:active::before { opacity: 1; }
+  .donate-card:active { border-color: var(--accent); }
+  .donate-logo {
+    font-size: 20px; flex-shrink: 0; width: 30px; text-align: center;
+    position: relative; z-index: 1;
+  }
+  .donate-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+  .donate-bank { font-size: 12px; font-weight: 700; }
+  .donate-num { font-size: 11px; font-family: var(--mono); color: var(--muted); margin-top: 1px; letter-spacing: 0.04em; }
+  .donate-copy { font-size: 10px; color: var(--muted2); position: relative; z-index: 1; }
+  .about-divider {
+    height: 1px; background: var(--border); margin: 2px 0;
+  }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 16px;
+    font-size: 13px; font-weight: 500; z-index: 100;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    white-space: nowrap; pointer-events: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.ok { border-color: var(--green); color: var(--green); }
+  #toast.err { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">~</div>
+  <h1>TG WS Proxy</h1>
+  <span class="ver" id="ver">—</span>
+</header>
+
+<main>
+
+  <div class="tab-page active" id="tab-main">
+
+    <div class="card">
+      <div class="card-hdr">Статус</div>
+      <div class="status-body">
+        <div class="dot loading" id="dot"></div>
+        <div class="status-info">
+          <div class="status-label" id="st-label">Загрузка…</div>
+          <div class="status-sub" id="st-sub">—</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-start" disabled onclick="startProxy()">▶ Старт</button>
+          <button class="btn btn-danger btn-sm" id="btn-stop" disabled onclick="stopProxy()">■ Стоп</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">Ссылка для подключения</div>
+      <div class="link-box">
+        <div class="link-text empty" id="proxy-link">Запустите прокси, чтобы получить ссылку</div>
+        <button class="btn btn-ghost btn-sm" id="btn-copy" onclick="copyLink()" disabled>Копировать</button>
+        <button class="btn btn-ghost btn-sm" id="btn-tg" onclick="openInTg()" disabled>Открыть TG</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tab-page" id="tab-settings">
+
+    <div class="card">
+      <div class="card-hdr">Параметры прокси</div>
+      <div class="settings-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Порт</label>
+            <input type="number" id="f-port" placeholder="1443" min="1" max="65535">
+          </div>
+          <div class="field">
+            <label>Host</label>
+            <input type="text" id="f-host" placeholder="127.0.0.1">
+          </div>
+        </div>
+        <div class="field">
+          <label>Secret (MD5, 32 символа — пусто = авто)</label>
+          <input type="text" id="f-secret" placeholder="оставьте пустым для автогенерации" maxlength="32">
+        </div>
+        <div class="field">
+          <label>CF Domain (необязательно)</label>
+          <input type="text" id="f-cfdomain" placeholder="example.com">
+        </div>
+        <div class="field">
+          <label>Fake TLS домен (необязательно)</label>
+          <input type="text" id="f-faketls" placeholder="www.mozilla.org">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">Поведение</div>
+      <div class="settings-body">
+        <div class="field">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Автозапуск при загрузке</div>
+              <div class="toggle-desc">Запускать прокси при старте системы</div>
+            </div>
+            <button class="toggle" id="t-auto" onclick="this.classList.toggle('on')"></button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Авто-открытие Telegram</div>
+              <div class="toggle-desc">Открывать TG автоматически после старта прокси</div>
+            </div>
+            <button class="toggle" id="t-autotg" onclick="this.classList.toggle('on')"></button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">CD Bypass</div>
+              <div class="toggle-desc">Автовыбор лучшего домена для обхода</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <button class="btn btn-ghost btn-sm" id="btn-cd-now" onclick="applyCdBypassNow()" title="Выбрать лучший домен прямо сейчас">Сейчас</button>
+              <button class="toggle" id="t-cd" onclick="this.classList.toggle('on')"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button class="btn btn-ghost" onclick="loadConfig()">Сбросить</button>
+        <button class="btn btn-primary" onclick="saveConfig()">Сохранить</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tab-page" id="tab-log">
+
+    <div class="card">
+      <div class="card-hdr">
+        Лог
+        <div class="hdr-actions">
+          <button class="btn btn-ghost btn-sm" onclick="loadLog()">↻ Обновить</button>
+        </div>
+      </div>
+      <div class="log-body">
+        <div class="log-out" id="log-out"><span class="log-empty">Лог пуст</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        Диагностика
+        <div class="hdr-actions">
+          <button class="btn btn-ghost btn-sm" onclick="runDiag()">Проверить</button>
+        </div>
+      </div>
+      <div class="log-body">
+        <div class="log-out" id="diag-out"><span class="log-empty">Нажмите «Проверить»</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tab-page" id="tab-about">
+
+    <div class="card">
+      <div class="card-hdr">О проекте</div>
+      <div class="about-body">
+        <div>
+          <div class="about-section-title">Авторство</div>
+          <div class="credit-row">
+            <div class="credit-icon">·</div>
+            <div class="credit-info">
+              <div class="credit-label">Бинарник</div>
+              <div class="credit-value">tg-ws-proxy-rs</div>
+            </div>
+            <div class="credit-badge">valnesfjord</div>
+          </div>
+          <div class="credit-row">
+            <div class="credit-icon">·</div>
+            <div class="credit-info">
+              <div class="credit-label">Оригинальный проект</div>
+              <div class="credit-value">FLOWSEAL</div>
+            </div>
+          </div>
+          <div class="credit-row">
+            <div class="credit-icon">·</div>
+            <div class="credit-info">
+              <div class="credit-label">Magisk-модуль и WebUI</div>
+              <div class="credit-value">F1NDLE</div>
+            </div>
+            <div class="credit-badge">Автор</div>
+          </div>
+        </div>
+        <div class="about-divider"></div>
+        <div>
+          <div class="about-section-title">Поддержать автора</div>
+          <div class="donate-block">
+            <div class="donate-card" onclick="copyDonate('4100119389701453', 'ЮMoney')">
+              <div class="donate-logo">Y</div>
+              <div class="donate-info">
+                <div class="donate-bank">ЮMoney</div>
+                <div class="donate-num">4100 1193 8970 1453</div>
+              </div>
+              <div class="donate-copy">Нажмите, чтобы скопировать</div>
+            </div>
+            <div class="donate-card" onclick="copyDonate('2200701799637712', 'Т-Банк')">
+              <div class="donate-logo">T</div>
+              <div class="donate-info">
+                <div class="donate-bank">Т-Банк</div>
+                <div class="donate-num">2200 7017 9963 7712 · Маис М.</div>
+              </div>
+              <div class="donate-copy">Нажмите, чтобы скопировать</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<nav id="bottom-nav">
+  <button class="tab-btn active" onclick="switchTab('main', this)">
+    <span class="tab-icon">⌂</span>
+    <span class="tab-label">Главная</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('settings', this)">
+    <span class="tab-icon">⚙</span>
+    <span class="tab-label">Настройки</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('log', this)">
+    <span class="tab-icon">≡</span>
+    <span class="tab-label">Лог</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('about', this)">
+    <span class="tab-icon">i</span>
+    <span class="tab-label">О проекте</span>
+  </button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function sh(cmd) {
+  return new Promise((resolve) => {
+    if (!window.ksu || typeof window.ksu.exec !== 'function') {
+      console.warn('[DEV] sh():', cmd);
+      resolve({ errno: 0, stdout: '', stderr: '' });
+      return;
+    }
+
+    let syncResult;
+    let syncOk = false;
+    try {
+      syncResult = window.ksu.exec(cmd);
+      syncOk = true;
+    } catch(e) {
+
+    }
+    if (syncOk) {
+      resolve({ errno: 0, stdout: syncResult || '', stderr: '' });
+      return;
+    }
+
+    try {
+      window.ksu.exec(cmd, function(exitCode, stdout, stderr) {
+        resolve({ errno: exitCode, stdout: stdout || '', stderr: stderr || '' });
+      });
+    } catch(e) {
+      resolve({ errno: 1, stdout: '', stderr: String(e) });
+    }
+  });
+}
+
+function ksuToast(msg) {
+  if (window.ksu && typeof window.ksu.toast === 'function') {
+    window.ksu.toast(msg);
+  }
+}
+
+let MODULE_DIR = '/data/adb/modules/tg_ws_proxy_f1ndle';
+
+function initPaths() {
+  try {
+    if (window.ksu && typeof window.ksu.moduleInfo === 'function') {
+      const info = JSON.parse(window.ksu.moduleInfo());
+      if (info && info.moduleDir) MODULE_DIR = info.moduleDir;
+    }
+  } catch(e) {  }
+}
+
+function paths() {
+  return {
+    conf:    MODULE_DIR + '/config.conf',
+    log:     MODULE_DIR + '/proxy.log',
+    pid:     MODULE_DIR + '/proxy.pid',
+    started: MODULE_DIR + '/started',
+    stopped: MODULE_DIR + '/stopped',
+    action:  MODULE_DIR + '/action_web.sh',
+    prop:    MODULE_DIR + '/module.prop',
+  };
+}
+
+let proxyLink = '';
+let isRunning = false;
+
+window.addEventListener('load', async () => {
+  initPaths();
+  await loadVersion();
+  await loadConfig();
+  await refreshStatus();
+  await loadLog();
+
+  setInterval(async () => {
+    await refreshStatus();
+    if (isRunning) await loadLog();
+  }, 5000);
+});
+
+async function loadVersion() {
+  const p = paths();
+  const r = await sh(`grep '^version=' '${p.prop}' 2>/dev/null | cut -d= -f2 | tr -d '\\r\\n'`);
+  if (r.errno === 0 && r.stdout.trim()) {
+    document.getElementById('ver').textContent = r.stdout.trim();
+  }
+}
+
+async function getStatusFile() {
+  const p = paths();
+  const r = await sh(`[ -f '${p.started}' ] && echo running || echo stopped`);
+  return r.stdout.trim();
+}
+
+async function getRunningPid() {
+
+  const p = paths();
+  const r = await sh(`cat '${p.pid}' 2>/dev/null | tr -d '\\r\\n '`);
+  return r.stdout.trim() || null;
+}
+
+async function refreshStatus() {
+  setStatusLoading();
+  const status = await getStatusFile();
+  if (status === 'running') {
+    const pid = await getRunningPid();
+    setStatusRunning(pid || '?');
+    await readProxyLink();
+  } else {
+    setStatusStopped();
+    setLink('');
+  }
+}
+
+function setStatusLoading() {
+  document.getElementById('dot').className = 'dot loading';
+  document.getElementById('st-label').textContent = 'Загрузка…';
+  document.getElementById('st-sub').textContent = '—';
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-stop').disabled = true;
+}
+
+function setStatusRunning(pid) {
+  isRunning = true;
+  document.getElementById('dot').className = 'dot running';
+  document.getElementById('st-label').textContent = 'Работает';
+  document.getElementById('st-sub').textContent = 'PID ' + pid;
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-stop').disabled = false;
+}
+
+function setStatusStopped() {
+  isRunning = false;
+  document.getElementById('dot').className = 'dot stopped';
+  document.getElementById('st-label').textContent = 'Остановлен';
+  document.getElementById('st-sub').textContent = '—';
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+}
+
+async function readProxyLink() {
+  const p = paths();
+  const r = await sh(`grep -o 'tg://proxy?server=[^ ]*' '${p.log}' 2>/dev/null | tail -n 1 | tr -d '\\r\\n'`);
+  if (r.errno === 0 && r.stdout.trim()) {
+
+    const hostR = await sh(`grep '^HOST=' '${p.conf}' 2>/dev/null | cut -d= -f2 | tr -d '\\r\\n '`);
+    const host = (hostR.stdout || '').trim() || '127.0.0.1';
+    const link = r.stdout.trim().replace(/server=[^&]*/, 'server=' + host);
+    setLink(link);
+  } else {
+    setLink('');
+  }
+}
+
+function setLink(link) {
+  proxyLink = link;
+  const el = document.getElementById('proxy-link');
+  const btnCopy = document.getElementById('btn-copy');
+  const btnTg   = document.getElementById('btn-tg');
+  if (link) {
+    el.textContent = link;
+    el.className = 'link-text';
+    btnCopy.disabled = false;
+    btnTg.disabled   = false;
+  } else {
+    el.textContent = 'Запустите прокси, чтобы получить ссылку';
+    el.className = 'link-text empty';
+    btnCopy.disabled = true;
+    btnTg.disabled   = true;
+  }
+}
+
+async function startProxy() {
+  document.getElementById('btn-start').disabled = true;
+  setStatusLoading();
+  document.getElementById('st-label').textContent = 'Запуск…';
+
+  const p = paths();
+
+  if (await getStatusFile() === 'running') {
+    await refreshStatus();
+    await loadLog();
+    return;
+  }
+
+  const r = await sh(`sh '${p.action}' 2>&1`);
+  if (r.errno === 0) {
+    toast('Прокси запущен', 'ok');
+    ksuToast('TG WS Proxy запущен');
+  } else {
+    toast('Ошибка запуска', 'err');
+  }
+
+  await delay(2000);
+  await refreshStatus();
+  await loadLog();
+
+  const autoTgEnabled = document.getElementById('t-autotg').classList.contains('on');
+  if (r.errno === 0 && autoTgEnabled && proxyLink) {
+    const safe = proxyLink.replace(/'/g, "'\\''");
+    await sh(`am start -a android.intent.action.VIEW -d '${safe}' 2>/dev/null`);
+    toast('Telegram открывается…', 'ok');
+  }
+}
+
+async function stopProxy() {
+  document.getElementById('btn-stop').disabled = true;
+  const p = paths();
+
+  if (await getStatusFile() !== 'running') {
+    await refreshStatus();
+    return;
+  }
+
+  const r = await sh(`sh '${p.action}' 2>&1`);
+  if (r.errno === 0) {
+    toast('Прокси остановлен', 'ok');
+    ksuToast('TG WS Proxy остановлен');
+  } else {
+    toast('Ошибка остановки', 'err');
+  }
+
+  await delay(600);
+  await refreshStatus();
+}
+
+async function loadConfig() {
+  const p = paths();
+
+  async function getKey(key, def) {
+    const r = await sh(`grep -m1 '^${key}=' '${p.conf}' 2>/dev/null | cut -d= -f2- | tr -d '\\r\\n'`);
+    const v = (r.stdout || '').trim();
+    return v !== '' ? v : def;
+  }
+
+  const port      = await getKey('PORT',      '1443');
+  const host      = await getKey('HOST',      '127.0.0.1');
+  const secret    = await getKey('SECRET',    '');
+  const cfdomain  = await getKey('CF_DOMAIN', '');
+  const faketls   = await getKey('FAKE_TLS',  '');
+  const autostart = await getKey('AUTOSTART', 'OFF');
+  const cdbypass  = await getKey('CD_BYPASS', 'OFF');
+  const autotg    = await getKey('AUTO_TG',   'OFF');
+
+  setVal('f-port',     port);
+  setVal('f-host',     host);
+  setVal('f-secret',   secret);
+  setVal('f-cfdomain', cfdomain);
+  setVal('f-faketls',  faketls);
+  setOn('t-auto',   autostart === 'ON');
+  setOn('t-cd',     cdbypass  === 'ON');
+  setOn('t-autotg', autotg    === 'ON');
+}
+
+async function saveConfig() {
+  const port     = getVal('f-port')     || '1443';
+  const host     = getVal('f-host')     || '127.0.0.1';
+  const secret   = getVal('f-secret')   || '';
+  const cfdomain = getVal('f-cfdomain') || '';
+  const faketls  = getVal('f-faketls')  || '';
+  const autostart = isOn('t-auto') ? 'ON' : 'OFF';
+  const cdbypass  = isOn('t-cd')   ? 'ON' : 'OFF';
+  const autotg    = isOn('t-autotg') ? 'ON' : 'OFF';
+  const p = paths();
+
+  if (!/^\d+$/.test(port) || +port < 1 || +port > 65535) {
+    toast('Некорректный порт', 'err');
+    return;
+  }
+  if (secret && (secret.length !== 32 || /[^0-9a-fA-F]/.test(secret))) {
+    toast('Secret должен быть 32 hex-символа или пустым', 'err');
+    return;
+  }
+
+  const content = [
+    `PORT=${port}`,
+    `HOST=${host}`,
+    `SECRET=${secret}`,
+    `CF_DOMAIN=${cfdomain}`,
+    `FAKE_TLS=${faketls}`,
+    `AUTOSTART=${autostart}`,
+    `CD_BYPASS=${cdbypass}`,
+    `AUTO_TG=${autotg}`,
+  ].join('\n') + '\n';
+
+  const b64 = utf8ToBase64(content);
+  const writeCmd = `echo '${b64}' | base64 -d > '${p.conf}'`;
+  const writeR = await sh(writeCmd);
+
+  if (writeR.errno === 0) {
+    toast('Настройки сохранены', 'ok');
+    await loadConfig();
+
+    if (await getStatusFile() === 'running') {
+      toast('Перезапуск с новыми настройками…', 'ok');
+      await sh(`sh '${p.action}' 2>&1`);
+      await delay(800);
+      await sh(`sh '${p.action}' 2>&1`);
+      await delay(2000);
+      await refreshStatus();
+      await loadLog();
+    }
+  } else {
+    const errMsg = (writeR.stderr || writeR.stdout || 'ошибка записи файла').trim().slice(0, 120);
+    toast('Ошибка сохранения: ' + errMsg, 'err');
+    console.error('saveConfig error:', { writeR, writeCmd });
+  }
+}
+
+async function applyCdBypassNow() {
+  const btn = document.getElementById('btn-cd-now');
+  btn.disabled = true;
+  btn.textContent = 'Пингую…';
+  toast('Выбираю лучший домен…');
+
+  const p = paths();
+
+  const E = 'bm9za29tbmFkem9yLmNvLnVrIGNha2Vpc2FsaWUuY28udWsgS2FydG9zaGthLmNvLnVrIHBjbGVhZC5jby51aw==';
+  const decodeCmd = `echo '${E}' | base64 -d`;
+  const decR = await sh(decodeCmd);
+  const domains = (decR.stdout || '').trim().split(/\s+/).filter(Boolean);
+
+  if (!domains.length) {
+    toast('Не удалось получить список доменов', 'err');
+    btn.disabled = false; btn.textContent = 'Сейчас';
+    return;
+  }
+
+  let bestDomain = '';
+  let minLatency = 9999;
+  for (const dom of domains) {
+    const r = await sh(`ping -c 3 -W 2 '${dom}' 2>/dev/null | tail -1`);
+    const line = (r.stdout || '').trim();
+    if (line) {
+
+      const m = line.match(/[\d.]+\/([\d.]+)\//);
+      if (m) {
+        const lat = parseFloat(m[1]);
+        if (lat < minLatency) { minLatency = lat; bestDomain = dom; }
+      }
+    }
+  }
+
+  if (!bestDomain) {
+
+    bestDomain = domains[Math.floor(Math.random() * domains.length)];
+    toast('Ping не прошёл, выбран случайный домен', 'err');
+  }
+
+  const cleanDomain = bestDomain.replace(/^kws\d*\./, '');
+
+  const updateCmd = `grep -v '^CF_DOMAIN=' '${p.conf}' > '${p.conf}.tmp' && echo 'CF_DOMAIN=${cleanDomain}' >> '${p.conf}.tmp' && mv '${p.conf}.tmp' '${p.conf}'`;
+  const upR = await sh(updateCmd);
+
+  const verR = await sh(`grep '^CF_DOMAIN=' '${p.conf}' 2>/dev/null`);
+  if ((verR.stdout || '').includes('CF_DOMAIN=')) {
+    toast(`CD Bypass: ${cleanDomain} (${minLatency < 9999 ? minLatency.toFixed(1) + ' ms' : 'ping н/д'})`, 'ok');
+    await loadConfig();
+  } else {
+    toast('Не удалось обновить CF_DOMAIN', 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Сейчас';
+}
+
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => { binary += String.fromCharCode(b); });
+  return btoa(binary);
+}
+
+async function loadLog() {
+  const p = paths();
+  const r = await sh(`tail -60 '${p.log}' 2>/dev/null | base64 | tr -d '\\n'`);
+  const el = document.getElementById('log-out');
+  let raw = '';
+  try {
+    raw = (r.stdout || '').trim();
+    if (raw) raw = atob(raw);
+  } catch(e) {
+
+    raw = r.stdout || '';
+  }
+  raw = raw.trim();
+  if (!raw) {
+    el.innerHTML = '<span class="log-empty">Лог пуст</span>';
+    return;
+  }
+  el.innerHTML = raw
+    .split('\n')
+    .map(line => {
+      const esc = line
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      if (esc.includes('tg://proxy'))          return `<span class="ll">${esc}</span>`;
+      if (/error|failed|panic/i.test(esc))     return `<span class="le">${esc}</span>`;
+      if (/INFO|listen|start|port/i.test(esc)) return `<span class="li">${esc}</span>`;
+      return esc;
+    })
+    .join('\n');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function copyLink() {
+  if (!proxyLink) return;
+
+  const copied = await tryClipboard(proxyLink);
+  toast(copied ? 'Скопировано' : 'Не удалось скопировать', copied ? 'ok' : 'err');
+}
+
+async function tryClipboard(text) {
+
+  if (navigator.clipboard) {
+    try { await navigator.clipboard.writeText(text); return true; } catch(e) {}
+  }
+
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) return true;
+  } catch(e) {}
+
+  const safe = proxyLink.replace(/'/g, "'\\''");
+  const r = await sh(`am broadcast -a clipper.set --es text '${safe}' 2>/dev/null; echo $?`);
+  return r.errno === 0;
+}
+
+async function openInTg() {
+  if (!proxyLink) return;
+  const safe = proxyLink.replace(/'/g, "'\\''");
+  await sh(`am start -a android.intent.action.VIEW -d '${safe}' 2>/dev/null`);
+}
+
+async function copyDonate(number, bank) {
+  const copied = await tryClipboard(number);
+  toast(copied ? `✓ ${bank}: ${number} скопирован` : `✕ Не удалось скопировать`, copied ? 'ok' : 'err');
+}
+
+function parseConf(text) {
+  const cfg = {};
+  for (const line of text.split(/\r?\n/)) {
+    const m = line.match(/^([A-Z_]+)=(.*)/);
+    if (m) cfg[m[1]] = m[2].trim();
+  }
+  return cfg;
+}
+function getVal(id)   { return document.getElementById(id).value.trim(); }
+function setVal(id,v) { document.getElementById(id).value = v; }
+function isOn(id)     { return document.getElementById(id).classList.contains('on'); }
+function setOn(id,v)  {
+  const el = document.getElementById(id);
+  if (v) el.classList.add('on'); else el.classList.remove('on');
+}
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+let toastTimer;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 2800);
+}
+
+async function runDiag() {
+  const el = document.getElementById('diag-out');
+  el.textContent = '';
+  const print = (s) => { el.textContent += s + '\n'; el.scrollTop = el.scrollHeight; };
+
+  print('window.ksu доступен: ' + (window.ksu ? 'да' : 'НЕТ — открыто не через KSU WebUI'));
+  print('window.ksu.exec тип: ' + (window.ksu ? typeof window.ksu.exec : 'n/a'));
+  print('MODULE_DIR: ' + MODULE_DIR);
+
+  if (window.ksu && typeof window.ksu.moduleInfo === 'function') {
+    try { print('moduleInfo(): ' + window.ksu.moduleInfo()); }
+    catch(e) { print('moduleInfo() error: ' + e); }
+  } else {
+    print('moduleInfo(): функция отсутствует');
+  }
+
+  print('--- проверка sh("echo hello") ---');
+  const echoR = await sh('echo hello_from_shell');
+  print('errno=' + echoR.errno + ' stdout="' + echoR.stdout.trim() + '" stderr="' + echoR.stderr + '"');
+  if (!echoR.stdout.trim()) {
+    print('ОШИБКА: exec не вернул вывод. Дальнейшая диагностика бессмысленна.');
+    return;
+  }
+
+  const p = paths();
+
+  print('--- ls MODULE_DIR ---');
+  const lsDir = await sh(`ls -la '${MODULE_DIR}' 2>&1`);
+  print('errno=' + lsDir.errno);
+  print((lsDir.stdout || '').trim() || '(пусто)');
+
+  for (const [name, path] of [['started', p.started], ['stopped', p.stopped], ['proxy.pid', p.pid], ['proxy.log', p.log]]) {
+    const r = await sh(`ls -la '${path}' 2>&1`);
+    print(`${name}: ` + ((r.stdout || r.stderr || '').trim() || '(нет файла)'));
+  }
+
+  print('--- статус ---');
+  const statusR = await sh(`[ -f '${p.started}' ] && echo running || echo stopped`);
+  print('stdout="' + statusR.stdout.trim() + '"');
+
+  print('--- готово ---');
+}
+</script>
+</body>
+</html>
