@@ -4,5 +4,5 @@ version=#version
 versionCode=#version
 author=F1NDLE
 description=Модуль для обхода замедления Telegram через прокси модуля (MTProto)
-updateJson=https://raw.githubusercontent.com/F1NDLE/tg_ws_proxy_magisk/refs/heads/main/update.json
+updateJson=https://raw.githubusercontent.com/SirWant/tg_ws_proxy_magisk/refs/heads/main/update.json
 support=https://t.me/F1NDLE_cn
