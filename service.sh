@@ -66,6 +66,7 @@ fi
 ARGS="--port ${PORT:-1443} --host ${HOST:-127.0.0.1} --secret $SECRET"
 [ -n "$CLEAN_DOMAIN" ] && ARGS="$ARGS --cf-domain $CLEAN_DOMAIN"
 [ -n "$FAKE_TLS" ] && ARGS="$ARGS --listen-faketls-domain $FAKE_TLS"
+[ -n "$CF_WORKER_DOMAIN" ] && ARGS="$ARGS --cf-worker-domain $CF_WORKER_DOMAIN"
 rm -f "$STARTED" "$STOPPED"
 RETRY=0
 while [ $RETRY -lt 5 ]; do
