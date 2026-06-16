@@ -34,7 +34,7 @@
     background: var(--bg);
     color: var(--text);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.5;
     min-height: 100vh;
   }
@@ -60,9 +60,9 @@
     font-size: 15px; flex-shrink: 0;
     box-shadow: 0 0 12px var(--accent-glow);
   }
-  header h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+  header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
   header .ver {
-    font-size: 10px; color: var(--muted); margin-left: auto;
+    font-size: 12px; color: var(--muted); margin-left: auto;
     background: var(--surface2); border: 1px solid var(--border);
     padding: 2px 7px; border-radius: 20px; font-family: var(--mono);
   }
@@ -80,7 +80,7 @@
   }
   .card-hdr {
     padding: 10px 14px 9px;
-    font-size: 10px; font-weight: 700;
+    font-size: 12px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.1em;
     color: var(--muted);
     border-bottom: 1px solid var(--border);
@@ -90,7 +90,7 @@
   .card-hdr-icon {
     width: 16px; height: 16px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 12px; opacity: 0.7;
+    font-size: 14px; opacity: 0.7;
   }
 
   /* ── Status ── */
@@ -110,14 +110,14 @@
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
   .status-info { flex: 1; min-width: 0; }
   .status-label { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
-  .status-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
+  .status-sub { font-size: 12px; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
   .btn-row { display: flex; gap: 7px; flex-shrink: 0; }
 
   /* ── Buttons ── */
   .btn {
     padding: 7px 13px; border-radius: var(--radius-sm);
     border: 1px solid transparent;
-    font-size: 12px; font-weight: 600;
+    font-size: 14px; font-weight: 600;
     cursor: pointer;
     display: inline-flex; align-items: center; gap: 5px;
     transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
@@ -140,7 +140,7 @@
     background: var(--surface2); color: var(--text); border-color: var(--border);
   }
   .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
 
   /* ── Button bounce on hover ── */
   .btn:not(:disabled) {
@@ -186,7 +186,7 @@
     border-radius: 0 0 3px 3px;
   }
   .tab-icon { font-size: 18px; line-height: 1; }
-  .tab-label { font-size: 10px; font-weight: 600; letter-spacing: 0.03em; }
+  .tab-label { font-size: 12px; font-weight: 600; letter-spacing: 0.03em; }
 
   /* ── Tab pages ── */
   .tab-page { display: none; flex-direction: column; gap: 10px; }
@@ -197,24 +197,24 @@
   /* ── Link box ── */
   .link-box { padding: 12px 14px; display: flex; align-items: center; gap: 8px; }
   .link-text {
-    flex: 1; font-family: var(--mono); font-size: 11px;
+    flex: 1; font-family: var(--mono); font-size: 12px;
     color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     background: var(--accent-dim); border: 1px solid var(--accent-glow);
     border-radius: 6px; padding: 7px 9px;
   }
   .link-text.empty {
-    color: var(--muted); font-family: inherit; font-size: 12px;
+    color: var(--muted); font-family: inherit; font-size: 14px;
     background: var(--surface2); border-color: var(--border);
   }
 
   /* ── Settings ── */
   .settings-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
   .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .field label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
   .field input {
     background: var(--surface2); border: 1px solid var(--border);
     border-radius: var(--radius-sm); color: var(--text);
-    font-size: 13px; font-family: var(--mono);
+    font-size: 15px; font-family: var(--mono);
     padding: 8px 10px; outline: none; width: 100%;
     transition: border-color 0.15s, box-shadow 0.15s;
   }
@@ -226,8 +226,8 @@
     padding: 9px 11px; background: var(--surface2);
     border: 1px solid var(--border); border-radius: var(--radius-sm);
   }
-  .toggle-label { font-size: 13px; font-weight: 500; }
-  .toggle-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .toggle-label { font-size: 15px; font-weight: 500; }
+  .toggle-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
   .toggle {
     width: 40px; height: 23px; border-radius: 12px; border: none;
     cursor: pointer; position: relative; background: var(--border);
@@ -249,7 +249,7 @@
   /* ── Log ── */
   .log-body { padding: 10px 12px; }
   .log-out {
-    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
     white-space: pre-wrap; word-break: break-all;
     max-height: 200px; overflow-y: auto; line-height: 1.65;
   }
@@ -259,12 +259,12 @@
   .log-out .li { color: #7cb8ff; }
   .log-out .le { color: var(--red); }
   .log-out .ll { color: var(--green); }
-  .log-empty { color: var(--muted2); font-size: 12px; padding: 4px 0; }
+  .log-empty { color: var(--muted2); font-size: 14px; padding: 4px 0; }
 
   /* ── About card ── */
   .about-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
   .about-section-title {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px;
   }
   .credit-row {
@@ -274,14 +274,14 @@
   }
   .credit-row + .credit-row { margin-top: 6px; }
   .credit-icon {
-    font-size: 16px; width: 28px; text-align: center; flex-shrink: 0;
+    font-size: 18px; width: 28px; text-align: center; flex-shrink: 0;
   }
   .credit-info { flex: 1; min-width: 0; }
-  .credit-label { font-size: 12px; color: var(--muted); font-weight: 500; }
-  .credit-value { font-size: 13px; font-weight: 600; margin-top: 1px; }
-  .credit-value.mono { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .credit-label { font-size: 14px; color: var(--muted); font-weight: 500; }
+  .credit-value { font-size: 16px; font-weight: 600; margin-top: 1px; }
+  .credit-value.mono { font-family: var(--mono); font-size: 14px; color: var(--accent); }
   .credit-badge {
-    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    font-size: 12px; font-weight: 700; padding: 2px 7px;
     border-radius: 20px; flex-shrink: 0;
     background: var(--accent-dim); color: var(--accent);
     border: 1px solid var(--accent-glow); letter-spacing: 0.05em;
@@ -320,7 +320,7 @@
     transform: translateX(-50%) translateY(80px);
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 10px; padding: 9px 16px;
-    font-size: 13px; font-weight: 500; z-index: 100;
+    font-size: 16px; font-weight: 500; z-index: 100;
     transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
     white-space: nowrap; pointer-events: none;
     box-shadow: 0 4px 20px rgba(0,0,0,0.4);
@@ -391,6 +391,10 @@
           <label>CF Domain (необязательно)</label>
           <input type="text" id="f-cfdomain" placeholder="example.com">
         </div>
+        <div class="field">
+          <label>CF Worker Domain (необязательно)</label>
+          <input type="text" id="f-cfwdomain" placeholder="random-symbols-1234.username.workers.dev">
+        </div>        
         <div class="field">
           <label>Fake TLS домен (необязательно)</label>
           <input type="text" id="f-faketls" placeholder="www.mozilla.org">
@@ -793,6 +797,7 @@ async function loadConfig() {
   const host      = await getKey('HOST',      '127.0.0.1');
   const secret    = await getKey('SECRET',    '');
   const cfdomain  = await getKey('CF_DOMAIN', '');
+  const cfwdomain  = await getKey('CF_WORKER_DOMAIN', '');
   const faketls   = await getKey('FAKE_TLS',  '');
   const autostart = await getKey('AUTOSTART', 'OFF');
   const cdbypass  = await getKey('CD_BYPASS', 'OFF');
@@ -802,6 +807,7 @@ async function loadConfig() {
   setVal('f-host',     host);
   setVal('f-secret',   secret);
   setVal('f-cfdomain', cfdomain);
+  setVal('f-cfwdomain', cfwdomain);
   setVal('f-faketls',  faketls);
   setOn('t-auto',   autostart === 'ON');
   setOn('t-cd',     cdbypass  === 'ON');
@@ -813,6 +819,7 @@ async function saveConfig() {
   const host     = getVal('f-host')     || '127.0.0.1';
   const secret   = getVal('f-secret')   || '';
   const cfdomain = getVal('f-cfdomain') || '';
+  const cfwdomain = getVal('f-cfwdomain') || '';
   const faketls  = getVal('f-faketls')  || '';
   const autostart = isOn('t-auto') ? 'ON' : 'OFF';
   const cdbypass  = isOn('t-cd')   ? 'ON' : 'OFF';
@@ -833,6 +840,7 @@ async function saveConfig() {
     `HOST=${host}`,
     `SECRET=${secret}`,
     `CF_DOMAIN=${cfdomain}`,
+    `CF_WORKER_DOMAIN=${cfwdomain}`,
     `FAKE_TLS=${faketls}`,
     `AUTOSTART=${autostart}`,
     `CD_BYPASS=${cdbypass}`,
