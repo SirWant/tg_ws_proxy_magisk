@@ -5,6 +5,8 @@ BIN="$MODDIR/system/bin/$BIN_NAME"
 LOG="$MODDIR/proxy.log"
 CONF="$MODDIR/config.conf"
 PID_FILE="$MODDIR/proxy.pid"
+STARTED="$MODDIR/started"
+STOPPED="$MODDIR/stopped"
 
 chmod 755 "$BIN"
 chmod 777 "$MODDIR"
@@ -20,6 +22,8 @@ if [ -f "$PID_FILE" ]; then
     if kill -0 "$PID" 2>/dev/null; then
         kill "$PID"
         rm "$PID_FILE"
+        rm -f "$STARTED"
+        touch "$STOPPED"
         echo "Статус: Остановлено"
         exit 0
     fi
@@ -80,7 +84,7 @@ fi
 
 CLEAN_DOMAIN=$(echo "$ACTIVE_CF_DOMAIN" | sed -E 's/^kws[0-9]*\.//')
 rm -f "$LOG"
-
+rm -f "$STARTED" "$STOPPED"
 ARGS="--port $PORT --host $HOST --secret $SECRET --cf-domain $CLEAN_DOMAIN"
 [ -n "$FAKE_TLS" ] && ARGS="$ARGS --listen-faketls-domain $FAKE_TLS"
 [ -n "$CF_WORKER_DOMAIN" ] && ARGS="$ARGS --cf-worker-domain $CF_WORKER_DOMAIN"
@@ -97,6 +101,7 @@ for i in $(seq 1 10); do
         if [ -n "$RAW_LINK" ]; then
             LINK=$(echo "$RAW_LINK" | sed "s/server=[^&]*/server=$HOST/")
             echo "Статус: Работает на порту $PORT"
+            touch "$STARTED"
             am start -a android.intent.action.VIEW -d "$LINK" >/dev/null 2>&1
             exit 0
         fi
@@ -105,3 +110,9 @@ for i in $(seq 1 10); do
         exit 1
     fi
 done
+if kill -0 $NEW_PID 2>/dev/null; then
+    touch "$STARTED"
+else
+    rm -f "$PID_FILE"
+    touch "$STOPPED"
+fi
