@@ -1,7 +1,7 @@
 id=tg_ws_proxy_f1ndle
 name=TG WS Proxy
 version=21.3
-versionCode=21.3
+versionCode=213
 author=F1NDLE
 description=Модуль для обхода замедления Telegram через прокси модуля (MTProto)
 updateJson=https://raw.githubusercontent.com/SirWant/tg_ws_proxy_magisk/refs/heads/main/update.json
