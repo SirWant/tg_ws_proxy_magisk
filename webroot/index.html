@@ -450,7 +450,7 @@
       <div class="card-hdr">
         Лог
         <div class="hdr-actions">
-          <button class="btn btn-ghost btn-sm" onclick="loadLog()">↻ Обновить</button>
+          <button class="btn btn-ghost btn-sm" onclick="()">↻ Обновить</button>
         </div>
       </div>
       <div class="log-body">
@@ -631,11 +631,11 @@ window.addEventListener('load', async () => {
   await loadConfig();
   await refreshStatus();
   await loadLog();
-
+/*
   setInterval(async () => {
     await refreshStatus();
     if (isRunning) await loadLog();
-  }, 5000);
+  }, 5000);*/
 });
 
 async function loadVersion() {
