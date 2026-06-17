@@ -81,9 +81,9 @@ fi
 if [ "$CD_BYPASS" = "ON" ]; then
     BEST=$(select_best_domain)
     CLEAN_DOMAIN=$(echo "$BEST" | sed -E 's/^kws[0-9]*\.//')
-    grep -v "^CF_DOMAIN=" "$CONF" > "${CONF}.tmp"
-    echo "CF_DOMAIN=$CLEAN_DOMAIN" >> "${CONF}.tmp"
-    mv "${CONF}.tmp" "$CONF"
+#    grep -v "^CF_DOMAIN=" "$CONF" > "${CONF}.tmp"
+#    echo "CF_DOMAIN=$CLEAN_DOMAIN" >> "${CONF}.tmp"
+#    mv "${CONF}.tmp" "$CONF"
 else
     CLEAN_DOMAIN=""
 fi
