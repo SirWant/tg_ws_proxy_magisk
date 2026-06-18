@@ -847,7 +847,7 @@ async function saveConfig() {
     return;
   }
   
-  if (!domainWorkerChek()) {
+  if (cfwdomain && !domainWorkerChek()) {
     toast('Некорректный Worker!', 'err');
     return;
   }
