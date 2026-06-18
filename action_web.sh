@@ -85,7 +85,7 @@ if [ "$CD_BYPASS" = "ON" ]; then
 #    echo "CF_DOMAIN=$CLEAN_DOMAIN" >> "${CONF}.tmp"
 #    mv "${CONF}.tmp" "$CONF"
 else
-    CLEAN_DOMAIN=""
+    CLEAN_DOMAIN=$CF_DOMAIN
 fi
 
 rm -f "$LOG"
