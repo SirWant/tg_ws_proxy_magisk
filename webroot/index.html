@@ -850,7 +850,8 @@ async function saveConfig() {
   if (!domainWorkerChek()) {
     toast('Некорректный Worker!', 'err');
     return;
-  
+  }
+
   const content = [
     `PORT=${port}`,
     `HOST=${host}`,
@@ -1119,7 +1120,7 @@ async function runWorkerChek() {
   }
   raw = raw.trim();
   if (!raw) {
-    el.innerHTML = '<span class="log-empty">Лог пуст</span>';
+    el.innerHTML = '<span class="log-empty">Что-то пошло не так...</span>';
     return;
   }
   el.innerHTML = raw;
