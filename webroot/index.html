@@ -391,10 +391,20 @@
           <label>CF Domain (необязательно)</label>
           <input type="text" id="f-cfdomain" placeholder="example.com">
         </div>
-        <div class="field">
-          <label>CF Worker Domain (необязательно)</label>
-          <input type="text" id="f-cfwdomain" placeholder="random-symbols-1234.username.workers.dev">
-        </div>        
+  		  <div class="card">
+	  	    <div class="field">
+		        <div class="card-hdr">
+              <label>CF Worker Domain (необязательно)</label>
+			        <div class="hdr-actions">
+                <button class="btn btn-ghost btn-sm" id="btn-Wchek" onclick="runWorkerChek()">Проверить</button>
+              </div>
+		        </div>
+              <input id="f-cfwdomain" placeholder="random-symbols-1234.username.workers.dev" oninput="btnChek()">
+          </div>
+		      <div class="log-body">
+            <div class="log-out" id="chek-out"></div>
+          </div>
+		    </div>       
         <div class="field">
           <label>Fake TLS домен (необязательно)</label>
           <input type="text" id="f-faketls" placeholder="www.mozilla.org">
@@ -812,6 +822,8 @@ async function loadConfig() {
   setOn('t-auto',   autostart === 'ON');
   setOn('t-cd',     cdbypass  === 'ON');
   setOn('t-autotg', autotg    === 'ON');
+
+  btnChek();
 }
 
 async function saveConfig() {
@@ -834,7 +846,11 @@ async function saveConfig() {
     toast('Secret должен быть 32 hex-символа или пустым', 'err');
     return;
   }
-
+  
+  if (!domainWorkerChek()) {
+    toast('Некорректный Worker!', 'err');
+    return;
+  
   const content = [
     `PORT=${port}`,
     `HOST=${host}`,
@@ -1074,6 +1090,40 @@ async function runDiag() {
   print('stdout="' + statusR.stdout.trim() + '"');
 
   print('--- готово ---');
+}
+
+function domainWorkerChek() {
+    const cleanDomain = getVal('f-cfwdomain').trim().toLowerCase();
+    const workersRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.[a-z0-9]([a-z0-9-]*[a-z0-9])?\.workers\.dev$/;
+	return workersRegex.test(cleanDomain);
+}
+
+function btnChek() {
+    if (domainWorkerChek()){
+		document.getElementById('btn-Wchek').disabled = false;
+	} else {
+		document.getElementById('btn-Wchek').disabled = true;
+	}
+}
+
+async function runWorkerChek() {
+  const cfwdomain = getVal('f-cfwdomain');
+  const r = await sh(`su -c '/data/adb/modules/tg_ws_proxy_f1ndle/system/bin/tg-ws-proxy --cf-worker-domain ${cfwdomain} --check' | base64 | tr -d '\\n'`);
+  const el = document.getElementById('chek-out');
+  let raw = '';
+  try {
+    raw = (r.stdout || '').trim();
+    if (raw) raw = atob(raw);
+  } catch(e) {
+    raw = r.stdout || '';
+  }
+  raw = raw.trim();
+  if (!raw) {
+    el.innerHTML = '<span class="log-empty">Лог пуст</span>';
+    return;
+  }
+  el.innerHTML = raw;
+  el.scrollTop = el.scrollHeight;
 }
 </script>
 </body>
