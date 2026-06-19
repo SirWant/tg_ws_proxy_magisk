@@ -1,6 +1,6 @@
 {
-  "version": "21.3",
-  "versionCode": 213,
-  "zipUrl": "https://github.com/SirWant/tg_ws_proxy_magisk/releases/download/21.3/tg_ws_proxy_magisk.zip",
+  "version": "21.4",
+  "versionCode": 214,
+  "zipUrl": "https://github.com/SirWant/tg_ws_proxy_magisk/releases/download/21.4/tg_ws_proxy_magisk.zip",
   "changelog": "https://raw.githubusercontent.com/SirWant/tg_ws_proxy_magisk/refs/heads/main/CHANGELOG.md"
 }
