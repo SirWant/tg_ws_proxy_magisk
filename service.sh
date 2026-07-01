@@ -57,16 +57,13 @@ if [ "$CD_BYPASS" = "ON" ]; then
         BEST_DOMAIN=$1
     fi
     CLEAN_DOMAIN=$(echo "$BEST_DOMAIN" | sed -E 's/^kws[0-9]*\.//')
-#    grep -v "^CF_DOMAIN=" "$CONF" > "${CONF}.tmp"
-#    echo "CF_DOMAIN=$CLEAN_DOMAIN" >> "${CONF}.tmp"
-#    mv "${CONF}.tmp" "$CONF"
 else
-    CLEAN_DOMAIN=""
+    CLEAN_DOMAIN="$CF_DOMAIN"
 fi
 ARGS="--port ${PORT:-1443} --host ${HOST:-127.0.0.1} --secret $SECRET"
 [ -n "$CLEAN_DOMAIN" ] && ARGS="$ARGS --cf-domain $CLEAN_DOMAIN"
 [ -n "$FAKE_TLS" ] && ARGS="$ARGS --listen-faketls-domain $FAKE_TLS"
-[ -n "$CF_WORKER_DOMAIN" ] && ARGS="$ARGS --cf-worker-domain $CF_WORKER_DOMAIN"
+[ -n "$CF_WORKER_DOMAIN" ] && [ "$WORKER" = "ON" ] && ARGS="$ARGS --cf-worker-domain $CF_WORKER_DOMAIN"
 rm -f "$STARTED" "$STOPPED"
 RETRY=0
 while [ $RETRY -lt 5 ]; do
