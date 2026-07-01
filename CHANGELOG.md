@@ -1,3 +1,6 @@
+21.5
+Worker можно отключить (не удаляя домен). Фиксы CF Domain.
+
 21.4
 Добавлена проверка Worker в WebUI, отключено сохранение CF Domain при включении CD Bypass, fix CF Domain.
 
