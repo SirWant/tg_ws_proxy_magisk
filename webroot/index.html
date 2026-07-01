@@ -391,20 +391,21 @@
           <label>CF Domain (необязательно)</label>
           <input type="text" id="f-cfdomain" placeholder="example.com">
         </div>
-  		  <div class="card">
-	  	    <div class="field">
-		        <div class="card-hdr">
+        <div class="card">
+          <div class="field">
+            <div class="card-hdr">
               <label>CF Worker Domain (необязательно)</label>
-			        <div class="hdr-actions">
-                <button class="btn btn-ghost btn-sm" id="btn-Wchek" onclick="runWorkerChek()">Проверить</button>
-              </div>
-		        </div>
-              <input id="f-cfwdomain" placeholder="random-symbols-1234.username.workers.dev" oninput="btnChek()">
+              <button class="toggle" id="t-worker" onclick="this.classList.toggle('on')"></button>
+            </div>
+            <input id="f-cfwdomain" placeholder="random-symbols-1234.username.workers.dev" oninput="btnChek()">
+            <div class="hdr-actions">
+              <button class="btn btn-ghost btn-sm" id="btn-Wchek" onclick="runWorkerChek()">Проверить</button>
+            </div>
           </div>
-		      <div class="log-body">
+          <div class="log-body">
             <div class="log-out" id="chek-out"></div>
           </div>
-		    </div>       
+        </div>
         <div class="field">
           <label>Fake TLS домен (необязательно)</label>
           <input type="text" id="f-faketls" placeholder="www.mozilla.org">
@@ -460,7 +461,7 @@
       <div class="card-hdr">
         Лог
         <div class="hdr-actions">
-          <button class="btn btn-ghost btn-sm" onclick="()">↻ Обновить</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadLog()">↻ Обновить</button>
         </div>
       </div>
       <div class="log-body">
@@ -812,6 +813,7 @@ async function loadConfig() {
   const autostart = await getKey('AUTOSTART', 'OFF');
   const cdbypass  = await getKey('CD_BYPASS', 'OFF');
   const autotg    = await getKey('AUTO_TG',   'OFF');
+  const worker    = await getKey('WORKER',   'OFF');
 
   setVal('f-port',     port);
   setVal('f-host',     host);
@@ -822,6 +824,7 @@ async function loadConfig() {
   setOn('t-auto',   autostart === 'ON');
   setOn('t-cd',     cdbypass  === 'ON');
   setOn('t-autotg', autotg    === 'ON');
+  setOn('t-worker', worker    === 'ON');
 
   btnChek();
 }
@@ -836,6 +839,7 @@ async function saveConfig() {
   const autostart = isOn('t-auto') ? 'ON' : 'OFF';
   const cdbypass  = isOn('t-cd')   ? 'ON' : 'OFF';
   const autotg    = isOn('t-autotg') ? 'ON' : 'OFF';
+  const worker    = isOn('t-worker') ? 'ON' : 'OFF';
   const p = paths();
 
   if (!/^\d+$/.test(port) || +port < 1 || +port > 65535) {
@@ -862,6 +866,7 @@ async function saveConfig() {
     `AUTOSTART=${autostart}`,
     `CD_BYPASS=${cdbypass}`,
     `AUTO_TG=${autotg}`,
+    `WORKER=${worker}`,
   ].join('\n') + '\n';
 
   const b64 = utf8ToBase64(content);
@@ -1095,15 +1100,17 @@ async function runDiag() {
 
 function domainWorkerChek() {
     const cleanDomain = getVal('f-cfwdomain').trim().toLowerCase();
-    const workersRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.[a-z0-9]([a-z0-9-]*[a-z0-9])?\.workers\.dev$/;
+    const workersRegex = /^(?!:\/\/)(?:[a-zA-Z0-9А-Яа-яЁё](?:[a-zA-Z0-9А-Яа-яЁё-]{0,61}[a-zA-Z0-9А-Яа-яЁё])?\.)+[a-zA-ZА-Яа-яЁё]{2,63}$/i;
 	return workersRegex.test(cleanDomain);
 }
 
 function btnChek() {
     if (domainWorkerChek()){
 		document.getElementById('btn-Wchek').disabled = false;
+    document.getElementById('t-worker').disabled = false;
 	} else {
 		document.getElementById('btn-Wchek').disabled = true;
+    document.getElementById('t-worker').disabled = true;
 	}
 }
 
