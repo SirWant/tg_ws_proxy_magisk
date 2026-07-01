@@ -38,6 +38,7 @@ HOST=127.0.0.1
 SECRET=$SECRET
 CF_DOMAIN=
 CF_WORKER_DOMAIN=
+WORKER=OFF
 FAKE_TLS=
 AUTOSTART=OFF
 EOF
@@ -87,7 +88,7 @@ rm -f "$LOG"
 rm -f "$STARTED" "$STOPPED"
 ARGS="--port $PORT --host $HOST --secret $SECRET --cf-domain $CLEAN_DOMAIN"
 [ -n "$FAKE_TLS" ] && ARGS="$ARGS --listen-faketls-domain $FAKE_TLS"
-[ -n "$CF_WORKER_DOMAIN" ] && ARGS="$ARGS --cf-worker-domain $CF_WORKER_DOMAIN"
+[ -n "$CF_WORKER_DOMAIN" ] && [ "$WORKER" = "ON" ] && ARGS="$ARGS --cf-worker-domain $CF_WORKER_DOMAIN"
 
 export RUST_LOG=info
 nohup $BIN $ARGS > "$LOG" 2>&1 &
